@@ -9,22 +9,22 @@ VSPHERE="centos6.0 centos6.1 ubuntu12.04 ubuntu14.01 window7 windowxp"
 #ip range
 ip_start="10.55.1"
 
-function init_template_table(){
+init_template_table(){
 
     echo "init template table"
-    #init vsphere image template 
+    # init vsphere image template 
     for template_name in $VSPHERE
     do
         mysql -u $USERNAME -p$PASSWD -e "
         use apicloud;
         insert into templatetype (name, iaas_type) values(\"$template_name\", \"vsphere\");
-        "
+        " >/dev/null 2>&1
     done
     #init openstack image template
 }
 
 #init ip table
-function init_ip_table(){
+init_ip_table(){
     echo "init ip table"
     for i in $(seq 1 253)
     do
@@ -33,11 +33,11 @@ function init_ip_table(){
         mysql -u $USERNAME -p$PASSWD -e "
             use apicloud;
             insert into iptable (ipaddress, vlan_id, is_alloc) values (\"$ipaddress\", 4, 0)
-        "
+        " >/dev/null 2>&1
     done
 }
 
-function init_instancetype(){
+init_instancetype(){
     echo "init instances type"
     mysql -u $USERNAME -p$PASSWD -e "
         use apicloud;
@@ -47,10 +47,10 @@ function init_instancetype(){
     mysql -u $USERNAME -p$PASSWD -e "
         use apicloud;
         insert into instancetype (name, core_num, ram, disk, extend_disk) values (\"small\", 1, 1024, 60, 0)
-    "
+    " >/dev/null 2>&1
 }
 
-function create_db(){
+create_db(){
 
     echo "Create apicloud database..."
     mysql -u $USERNAME -p$PASSWD -e "
@@ -66,6 +66,7 @@ function create_db(){
             template_type varchar(16) NOT NULL,
             model_type varchar(16) NOT NULL,
             status varchar(16) NOT NULL,
+            is_run TINYINT(1) NOT NULL,
             instances_num INT UNSIGNED NOT NULL,
             PRIMARY KEY (task_id)
         );
@@ -73,7 +74,7 @@ function create_db(){
         drop table if exists instances; 
         create table instances(
             instance_uuid varchar(40) NOT NULL,
-            task_id varchar(40) NOT NULL,
+            task_id varchar(40),
             name varchar(40) NOT NULL,
             ip varchar(40) NOT NULL,
             status varchar(40) NOT NULL,
@@ -83,10 +84,11 @@ function create_db(){
             template_type varchar(16) NOT NULL,
             instance_type varchar(16) NOT NULL,
             iaas_type varchar(16) NOT NULL,
-            customers varchar(16) NOT NULL,
-            create_time DATETIME NOT NULL,
-            online_time DATETIME NOT NULL,
+            customers varchar(16),
+            create_time DATETIME,
+            online_time DATETIME,
             off_time DATETIME,
+            is_alloc TINYINT(1) NOT NULL,
             PRIMARY KEY (instance_uuid)
         );
 
@@ -119,7 +121,7 @@ function create_db(){
     "
 }
 
-function main(){
+main(){
 
     create_db
     init_template_table
