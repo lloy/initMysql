@@ -5,9 +5,9 @@
 USERNAME="admin"
 PASSWD="123456"
 #vsphere image template
-VSPHERE="centos6.0 centos6.1 ubuntu12.04 ubuntu14.01 window7 windowxp"
+VSPHERE="centos6.4 centos6.1 ubuntu12.04 ubuntu14.01 window7 windowxp"
 #ip range
-ip_start="10.55.1"
+ip_start="172.16.0"
 
 init_template_table(){
 
@@ -26,7 +26,7 @@ init_template_table(){
 #init ip table
 init_ip_table(){
     echo "init ip table"
-    for i in $(seq 1 253)
+    for i in $(seq 204 252)
     do
         sleep 0.05
         ipaddress=$ip_start.$i
@@ -41,7 +41,7 @@ init_instancetype(){
     echo "init instances type"
     mysql -u $USERNAME -p$PASSWD -e "
         use apicloud;
-        insert into instancetype (name, core_num, ram, disk, extend_disk) values (\"large\", 8, 8192, 60, 0)
+        insert into instancetype (name, core_num, ram, disk, extend_disk) values (\"8-8192-40\", 8, 8192, 40, 0)
     "
     sleep 0.05
     mysql -u $USERNAME -p$PASSWD -e "
@@ -75,7 +75,7 @@ create_db(){
         create table instances(
             instance_uuid varchar(40) NOT NULL,
             task_id varchar(40),
-            name varchar(40) NOT NULL,
+            name varchar(64) NOT NULL,
             ip varchar(40) NOT NULL,
             status varchar(40) NOT NULL,
             os_type varchar(40) NOT NULL,
