@@ -252,12 +252,11 @@ class Instance(object):
     template_type,\
     instance_type,\
     iaas_type,\
-    customers,\
     is_alloc,\
     create_time,\
     online_time,\
     off_time) values(\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\
-    \"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%d\",\"%s\",\"%s\",\"%s\")"
+    \"%s\",\"%s\",\"%s\",\"%s\",\"%d\",\"%s\",\"%s\",\"%s\")"
     TITLE = "instance-%s"
     DEFAULT_IAAS_TYPE = "vsphere"
     DEFAULT_CUSTOMERS = "1hao"
@@ -282,7 +281,6 @@ class Instance(object):
         os_type = template_type
         instance_type = model_type
         iaas_type = "vsphere"
-        customers = "1hao"
         is_alloc = 0
         create_time = online_time = off_time = timestamp
         return self.CREATE_CMD % (instance_uuid, name,
@@ -294,7 +292,6 @@ class Instance(object):
                                   template_type,
                                   instance_type,
                                   iaas_type,
-                                  customers,
                                   is_alloc,
                                   create_time,
                                   online_time,
