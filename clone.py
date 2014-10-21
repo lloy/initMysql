@@ -132,19 +132,34 @@ DNS=%s
 centos_configure = "echo \"%s\" > /etc/sysconfig/network-scripts/ifcfg-eth0\n"
 
 
+centos_hostname_cfg = """
+NETWORKING=yes
+HOSTNAME=%s
+"""
+
+ubuntu_hostname = "hostname %s"
+fedora_hostname = "hostname %s"
+centos_hostname = "echo \"%s\" > /etc/sysconfig/network\n"
+
 os_type = {'ubuntu': {'ifcfg_eth0': ubuntu_eth0,
                       'configure': ubuntu_configure,
                       # 'reboot': '/etc/init.d/networking restart\n'},
                       'reboot': 'reboot\n',
-                      'poweroff': 'poweroff\n'},
+                      'poweroff': 'poweroff\n',
+                      'hostname': ubuntu_hostname,
+                      'close_23': 'chkconfig telent off\n'},
            'fedora': {'ifcfg_eth0': fedora_eth0,
                       'configure': fedora_configure,
                       'reboot': '/etc/init.d/network restart\n',
-                      'poweroff': 'poweroff\n'},
+                      'poweroff': 'poweroff\n',
+                      'hostname': fedora_hostname,
+                      'close_23': 'chkconfig telent off\n'},
            'centos': {'ifcfg_eth0': centos_eth0,
                       'configure': centos_configure,
                       'reboot': '/etc/init.d/network restart\n',
-                      'poweroff': 'poweroff\n'},
+                      'hostname': centos_hostname,
+                      'poweroff': 'poweroff\n',
+                      'close_23': 'chkconfig telent off\n'},
            'win7': {},
            'winxp': {}}
 
@@ -316,7 +331,7 @@ class Instance(object):
 
 
 # reconfigure host
-def reconfigure(name):
+def reconfigure(instance, name, ip):
     try:
         # set system type
         yhd_os_type = "centos"
@@ -325,19 +340,24 @@ def reconfigure(name):
         if not system:
             raise Exception('ERROR: not support %s system' % yhd_os_type)
 
-        # get idle ip from db
-        instance = Instance()
-        ip = instance.get_idle_ip()
-        print ip
-        if not ip:
-            raise Exception("not alloc ip")
-
         # set reconfigure ip and poweroff command
         ifcfg_eth0 = system['ifcfg_eth0'] % (ip, custom_gateway, custom_dns)
         configure = system['configure'] % ifcfg_eth0
+
+        # set host name
+        hostname = 'instance-%s' % ip.replace('.', '-')
+        cfg = centos_hostname_cfg % hostname
+        hostname_configure = system['hostname'] % cfg
+
+        # set close Telnet command
+        close_telnet = system['close_23']
+
+        # set poweroff command
         poweroff = system['poweroff']
-        print configure
+
         cmdlist.append(configure)
+        cmdlist.append(hostname_configure)
+        cmdlist.append(close_telnet)
         cmdlist.append(poweroff)
 
         # login host pass Telnet
@@ -385,7 +405,7 @@ def get_obj(content, vimtype, name):
 
 
 # Connect to vCenter server and deploy a VM from template
-def clone(instance_name, template_name):
+def clone(instance, instance_name, template_name, ip):
 
     # connect to vCenter server
     try:
@@ -425,12 +445,12 @@ def clone(instance_name, template_name):
     print compute.resourcePool
     # resource_pool = cluster.resourcePool
     resource_pool = compute.resourcePool
-    datastore = get_obj(content, [vim.Datastore], default_datacenter["datastore_name"])
+    # datastore = get_obj(content, [vim.Datastore], default_datacenter["datastore_name"])
     template_vm = get_obj(content, [vim.VirtualMachine], template_name)
 
     # Relocation spec
     relospec = vim.vm.RelocateSpec()
-    relospec.datastore = datastore
+    # relospec.datastore = datastore
     relospec.pool = resource_pool
 
     # VM config spec
@@ -459,7 +479,7 @@ def clone(instance_name, template_name):
     time.sleep(60)
 
     # reconfigure host
-    reconfigure(instance_name)
+    reconfigure(instance, instance_name, ip)
 
 
 def main(**kwargs):
@@ -467,12 +487,21 @@ def main(**kwargs):
     # what VM template to use
     template_name = kwargs['template']
 
+    # get idle ip from db
+    instance = Instance()
+
     # clone template to a new VM
     for i in range(0, kwargs['number']):
-        name = "instance-%s" % str(uuid.uuid1())
-        clone(name, template_name)
+        print "START create [%d] instance..." % (i+1)
+        ip = instance.get_idle_ip()
+        print ip
+        if not ip:
+            raise Exception("not alloc ip")
+
+        ipname = ip.replace('.', '-')
+        name = "instance-%s-%s" % (str(uuid.uuid1()), ipname)
+        clone(instance, name, template_name, ip)
         print name
-        print "Wait 3 senconds, start create [%d] instance..." % (i+1)
         time.sleep(3)
 
 

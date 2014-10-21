@@ -7,7 +7,9 @@ PASSWD="123456"
 #vsphere image template
 VSPHERE="centos6.4 centos6.1 ubuntu12.04 ubuntu14.01 window7 windowxp"
 #ip range
-ip_start="172.16.0"
+ip_prefix="172.16.0"
+ip_start=240
+ip_end=252
 
 init_template_table(){
 
@@ -26,10 +28,10 @@ init_template_table(){
 #init ip table
 init_ip_table(){
     echo "init ip table"
-    for i in $(seq 204 252)
+    for i in $(seq $ip_start $ip_end)
     do
         sleep 0.05
-        ipaddress=$ip_start.$i
+        ipaddress=$ip_prefix.$i
         mysql -u $USERNAME -p$PASSWD -e "
             use apicloud;
             insert into iptable (ipaddress, vlan_id, is_alloc) values (\"$ipaddress\", 4, 0)
