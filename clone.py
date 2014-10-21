@@ -157,12 +157,12 @@ ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAzLq8vroVNHCfjBpTqA3IALq/bbGQb0Wi6o5fLKIyYOtU
 
 YHD_CFG = """
 useradd -m deploy\n
-sed -i '/deploy/d' /etc/shadow\n
-sed -i \"s/^\(root:\)[^:]*:/\\1*:/\" /etc/shadow\n
 mkdir /home/deploy/.ssh\n
 echo \"%s\" > /home/deploy/.ssh/authorized_keys\n
 mkdir /root/.ssh\n
 echo \"%s\" > /root/.ssh/authorized_keys\n
+sed -i \"s/^\(root:\)[^:]*:/\\1*:/\" /etc/shadow\n
+sed -i \"s/^\(deploy:\)[^:]*:/\\1*:/\" /etc/shadow\n
 """ % (deploy_key, root_key)
 
 
