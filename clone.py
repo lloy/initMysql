@@ -141,25 +141,52 @@ ubuntu_hostname = "hostname %s"
 fedora_hostname = "hostname %s"
 centos_hostname = "echo \"%s\" > /etc/sysconfig/network\n"
 
+###########################
+# YHD configure         ###
+###########################
+deploy_key="""
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAzpuECoOcRhxWS7uoKOmtGIijntHwVO+NCzXRA8zZpwGjA/hf4VSFuuVyJE4E4gSPtG4Wh19cAhPLD85F9F9jba+dS1I27WvG8bNVQemVgcRmHcKDFNb234K9sMaApWARxYMmgXycnpZg/6wacwgZLuX9YoX4gmrhdIgBb6Y5V7cqA860Wr90otvaIPeAYorN6Gbb0sv/o5pp+ch1Sn7x3RLI37gLLg3wPvWLQApd+64tWEzRk+a+7bF6alcZ3OpdLBBApU54Fb5jQFovzuKD/CFioOJoQaQjbiKrRp/PGYhmlD26cg8sssUjvE2j7FG269IiY1b/4i5RhqELeePw1Q== deploy@xen0328-vm05
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAx4NJmzuzX4qckbcj1dXvDltQHFemJRaqVu3WJMEF4VSgttGLfmfVVKBpwN1OdEIWgtWxPvxrcO8O767n1MpCyZ86p5aqC8aEPzgZq/ew0+D5jKBC9Jmudvn/iUASIpMDWMSwlW9ApC4TWURwUjfNmuqb8n1J8hJZUjQdKjBtd9bxO9gFBJS15pXI7dOExyEuJ9qR3SBwsAlR2r7RPB/9e2J3mnt9Bo1psAtUUzfP5WEpEK6c7LTjgrtokHCnufW0E58ABdSuUmI2/PQr/R6Dcy7f2u+PDNRfOUcq7YjwYiSsxugKkTRAGSjwb1i/K2WKPGA6Dtap2d1fgdSgkUm1qQ== deploy@xen21-vm04
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAuhHxbWxdQqKtvJ8tZQ3eswaR1nw9DE5anjcMBo58djrOig+zacdpzIR0HiH2bK4GpdU3vBoQU5bwGyCorALn7d1Lpqf/pSjzHHpow4C6JKXvLRXCzKAT0AAhzsSBT/OjzsRmb0wRCfwzsHQsaxTtLWq4PVQthdz20IO1vDZC0nCv6YQPKlOlGqyOINkmISzII7lN8z4bFZPZwhx4vX0GZd82U7od49Z1Yqu07eIRLh/0gnGQqFpZyvb0ub/8Mv8dFRBtzH3YfuiAYBGilsMRsU83sJNUqdw2w/qltw5xvA9447pBW3HOJs7z1vd7PNKUr+npy4zkcpe7qDyR6N6snQ== deploy@xen21-vm04
+"""
+
+root_key = """
+ssh-dss AAAAB3NzaC1kc3MAAACBAKXGqtplWSVzTPrZVNq9WiDVY7RqbX6oD5J64WZ6DC+KNHEPRUPDmmWZJnkHkspphOi1p5y3pxCkCcvq7dzqzjlY016jcd980jQ5xnZ1AAs9nj1j9C2Q6amalNRfalu6bdkO5t4giCRvOSTt9aHLP1sQVsgTpDo+axn6pgFl78pRAAAAFQCTbZKBj+rTpJCxxguGY+2y7/FBTQAAAIABTfLKx/CqzKrmp5NWpExWTqdf9A2Z31HNRg8hd/8FTAuli7fxjd8HcQRXeBNAowwoTrD575O3T+7wuvSSoLL8rXHx3BB6yM0AMRTyrRjfA+dtxOjTGtCCOTLX58sUrd/d3rXfANukZQ2ELlDpNmKU430AY+5f5FPnENunbDzThwAAAIBQLF0HJvCGAWXnWH5KO5bNRl2WGYtBp213gI42aDagiJe6JjpQiVvslYJqm2gK87TLeB9jmBBNx2OapvZUNVA6FRog2qA181T6R35caysbXjiSfrnF8ancMy9q1Vw2Uh/qLYKD+YR+2+4cTbvDBB3pY9llU3gyVMSWY4quKiAG4A== root@xen21-vm04
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAzLq8vroVNHCfjBpTqA3IALq/bbGQb0Wi6o5fLKIyYOtUEofs13xJ01puTKGOlULfj0PPwWspy896tZruqT1B28Q+SE7AkYUo/0EN6WS50Zo91Sl1AtXGSMehShfJ0Kbg4JR691ahE1XOQE3pl1c9Gk23JJyYC6hE/0UHdEXa3s1tI1fhMrXDBK00novr2EiEwt0gLpbOGN8tS2g0ojjILdFZJzFSMG2XA+cMtQg8TNCvG2D/g4OLRxSLXRfJ1i6m+qwSYV28fLSD3pEaNYMidBByIFAs7C/4Zlied2ZNaNU7UDfwbWyQN2uPaWwbcW9LzLGrs0LZrvmscdPMdHnRVQ== root@xen21-vm04
+"""
+
+YHD_CFG = """
+useradd -m deploy\n
+sed -i '/deploy/d' /etc/shadow\n
+sed -i \"s/^\(root:\)[^:]*:/\\1*:/\" /etc/shadow\n
+mkdir /home/deploy/.ssh\n
+echo \"%s\" > /home/deploy/.ssh/authorized_keys\n
+mkdir /root/.ssh\n
+echo \"%s\" > /root/.ssh/authorized_keys\n
+""" % (deploy_key, root_key)
+
+
 os_type = {'ubuntu': {'ifcfg_eth0': ubuntu_eth0,
                       'configure': ubuntu_configure,
-                      # 'reboot': '/etc/init.d/networking restart\n'},
                       'reboot': 'reboot\n',
                       'poweroff': 'poweroff\n',
                       'hostname': ubuntu_hostname,
-                      'close_23': 'chkconfig telent off\n'},
+                      'yhd_configure': YHD_CFG,
+                      'close_23': 'chkconfig xinetd off\n'},
            'fedora': {'ifcfg_eth0': fedora_eth0,
                       'configure': fedora_configure,
                       'reboot': '/etc/init.d/network restart\n',
                       'poweroff': 'poweroff\n',
                       'hostname': fedora_hostname,
-                      'close_23': 'chkconfig telent off\n'},
+                      'yhd_configure': YHD_CFG,
+                      'close_23': 'chkconfig xinetd off\n'},
            'centos': {'ifcfg_eth0': centos_eth0,
                       'configure': centos_configure,
                       'reboot': '/etc/init.d/network restart\n',
                       'hostname': centos_hostname,
+                      'yhd_configure': YHD_CFG,
                       'poweroff': 'poweroff\n',
-                      'close_23': 'chkconfig telent off\n'},
+                      'close_23': 'chkconfig xinetd off\n'},
            'win7': {},
            'winxp': {}}
 
@@ -354,9 +381,12 @@ def reconfigure(instance, name, ip):
 
         # set poweroff command
         poweroff = system['poweroff']
+        print poweroff
+        yhd_command = system['yhd_configure']
 
         cmdlist.append(configure)
         cmdlist.append(hostname_configure)
+        cmdlist.append(yhd_command)
         cmdlist.append(close_telnet)
         cmdlist.append(poweroff)
 
