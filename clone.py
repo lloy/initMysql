@@ -161,8 +161,8 @@ mkdir /home/deploy/.ssh\n
 echo \"%s\" > /home/deploy/.ssh/authorized_keys\n
 mkdir /root/.ssh\n
 echo \"%s\" > /root/.ssh/authorized_keys\n
-sed -i \"s/^\(root:\)[^:]*:/\\1*:/\" /etc/shadow\n
-sed -i \"s/^\(deploy:\)[^:]*:/\\1*:/\" /etc/shadow\n
+sed -i \"s/^\(root:\)[^:]*:/\\1:/\" /etc/shadow\n
+sed -i \"s/^\(deploy:\)[^:]*:/\\1:/\" /etc/shadow\n
 """ % (deploy_key, root_key)
 
 

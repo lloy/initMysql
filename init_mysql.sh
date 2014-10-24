@@ -8,7 +8,7 @@ PASSWD="123456"
 VSPHERE="centos6.4 centos6.1 ubuntu12.04 ubuntu14.01 window7 windowxp"
 #ip range
 ip_prefix="172.16.0"
-ip_start=240
+ip_start=201
 ip_end=252
 
 init_template_table(){

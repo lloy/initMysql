@@ -9,7 +9,7 @@ DELETE_FLAG="error"
 
 
 list_delete_instance(){
-echo "update tasks"
+echo "delete instances"
     mysql -u $USERNAME -p$PASSWD -e "
         use apicloud;
         select name from instances where status=\"$DELETE_FLAG\"
